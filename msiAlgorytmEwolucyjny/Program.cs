@@ -16,13 +16,19 @@ namespace msiAlgorytmEwolucyjny
         static void Main(string[] args)
         {
             var population = generatePopulation(XD, YD, PopSize);
-
-            for (int i = 0; i < PopSize; i++)
-            {
-                Console.WriteLine($"{i}: {population[i]}");
-            }
-
             mutatePopulation(population);
+            var newPopulation = selectNewPopulation(population);
+
+            var result = newPopulation
+                .GroupBy(x => x.X)
+                .OrderBy(x => x.Count())
+                .Select(x=>new{x.Key,Amount = x.Count()});
+
+            foreach (var i in result)
+            {
+                Console.WriteLine($"{i.Key}: {i.Amount}");
+            }
+            
         }
 
         static Osobnik[] generatePopulation(int zakresX, int zakresY, int size)
@@ -69,9 +75,38 @@ namespace msiAlgorytmEwolucyjny
             }
         }
 
+        static Osobnik[] selectNewPopulation(Osobnik[] population)
+        {
+            Osobnik[] newPopulation = new Osobnik[population.Length];
+
+            for (int i = 0; i < population.Length; i++)
+            {
+                int? enemyIndex = null;
+                do
+                {
+                    enemyIndex = rnd.Next(population.Length);
+                } while (enemyIndex == i);
+
+                if (population[i].Dopasowanie <= population[enemyIndex.Value].Dopasowanie)
+                    newPopulation[i] = population[enemyIndex.Value];
+                else
+                    newPopulation[i] = population[i];
+            }
+
+            return newPopulation;
+        }
+
         static double f(double x, double y)
         {
             return -Pow(x, 2) - Pow(y, 2);
+        }
+
+        static void PrintPopulation(Osobnik[] population)
+        {
+            for (int i = 0; i < population.Length; i++)
+            {
+                Console.WriteLine($"{i}: {population[i]}");
+            }
         }
     }
 }
