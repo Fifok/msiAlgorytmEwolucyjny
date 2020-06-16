@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.IO;
 using System.Linq;
+using System.Text;
 using static System.Math;
 
 namespace msiAlgorytmEwolucyjny
@@ -17,14 +19,19 @@ namespace msiAlgorytmEwolucyjny
         static void Main(string[] args)
         {
             var population = generatePopulation();
-            mutatePopulation(population);
-            population = selectNewPopulation(population);
-            Console.WriteLine("".PadLeft(100,'='));
-            PrintPopulation(population);
-            Console.WriteLine("".PadLeft(100,'='));
-            population = crossPopulation(population);
-            PrintPopulation(population);
+            for (int i = 0; i < 200; i++)
+            {
+                mutatePopulation(population);
+                population = crossPopulation(population);
+                population = selectNewPopulation(population);
+            }
+
+            var result = PopulationToString(population);
+            Console.WriteLine(result);
+
+            File.WriteAllText("output.txt", result);
         }
+
 
         static Osobnik[] generatePopulation()
         {
@@ -47,7 +54,7 @@ namespace msiAlgorytmEwolucyjny
             {
                 if (rnd.NextDouble() < PrawdoMuta)
                 {
-                    Console.Write($"Mutate {i}");
+                    //Console.Write($"Mutate {i}");
                     if (rnd.NextDouble() < 0.5)
                         population[i].X += rnd.NextDouble();
                     else
@@ -60,7 +67,7 @@ namespace msiAlgorytmEwolucyjny
 
                     if (population[i].X < -XD || population[i].X > XD || population[i].Y > YD || population[i].Y < -YD)
                     {
-                        Console.Write($"\tPunished   {population[i]}");
+                        //Console.Write($"\tPunished   {population[i]}");
 
                         population[i].Dopasowanie -= 1000;
                     }
@@ -103,7 +110,7 @@ namespace msiAlgorytmEwolucyjny
                 {
                      secondIndex = rnd.Next(population.Length);
                 } while (firstIndex == secondIndex);
-                Console.WriteLine($"First: {firstIndex} --- Second: {secondIndex}");
+                //Console.WriteLine($"First: {firstIndex} --- Second: {secondIndex}");
                 newPopulation[i] = generateChild(population[firstIndex], population[secondIndex]);
             }
 
@@ -142,10 +149,19 @@ namespace msiAlgorytmEwolucyjny
 
         static void PrintPopulation(Osobnik[] population)
         {
+            Console.WriteLine(PopulationToString(population));
+        }
+
+        static string PopulationToString(Osobnik[] population)
+        {
+            var sb = new StringBuilder();
+
             for (int i = 0; i < population.Length; i++)
             {
-                Console.WriteLine($"{i}: {population[i]}");
+               sb.AppendLine($"{i}: {population[i]}");
             }
+
+            return sb.ToString();
         }
     }
 }
